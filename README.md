@@ -1,7 +1,9 @@
 ---
-noteId: "c1ee78d0c4b211f1801dd56e82587a10"
+noteId: "7ae24590c4b511f18e27434f65ac3337"
 tags: []
+
 ---
+
 # SnapAnswer
 
 Point a camera at a question, press one button, and get a clear answer on screen and read out loud.
@@ -88,8 +90,8 @@ These steps take you from a fresh machine to a working SnapAnswer app. Most of t
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/olawalekaybee/snapanswer.git
-cd snapanswer
+git clone https://github.com/olawalekaybee/Snap_answer.git
+cd Snap_answer
 ```
 
 ### 2. Run the setup script (once)
