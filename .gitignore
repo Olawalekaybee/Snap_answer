@@ -1,0 +1,9 @@
+.anthropic_key
+captures/
+saved/
+settings.json
+open_snapanswer.sh
+__pycache__/
+*.pyc
+.venv/
+ 

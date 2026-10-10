@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SnapAnswer</title>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--deep:#0f141a;--line:#2a313c;--text:#e6edf3;--muted:#8b949e;
+        --accent:#2f81f7;--good:#3fb950;--warn:#d29922;--bad:#f85149;--online:#a371f7}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,"Segoe UI",Roboto,sans-serif;
+       display:flex;flex-direction:column}
+  header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .brand{font-weight:800;font-size:20px}
+  .pill{padding:6px 14px;border-radius:999px;font-weight:800;font-size:14px;background:#1f2a37;color:var(--muted)}
+  .pill.ready{color:var(--good)} .pill.busy{color:var(--warn)} .pill.speak{color:var(--accent)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:8px 16px;font-size:14px;background:transparent;color:var(--muted);text-align:left;line-height:1.2}
+  .seg button small{display:block;font-weight:600;font-size:11px;opacity:.8}
+  .seg button.on.off-mode{background:#12361f;color:var(--good)}
+  .seg button.on.on-mode{background:#2a1d47;color:var(--online)}
+  .cam{margin-left:auto;color:var(--muted);font-size:13px}
+  main{flex:1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(380px,1fr);gap:16px;padding:16px;min-height:0}
+  .left{display:flex;flex-direction:column;gap:12px;min-height:0}
+  .view{position:relative;background:#000;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+        aspect-ratio:16/9;max-height:68vh;align-self:center;width:100%;touch-action:none;user-select:none}
+  .view img{width:100%;height:100%;display:block;-webkit-user-drag:none}
+  #roi{position:absolute;border:2px solid #ffc800;border-radius:6px;cursor:move;
+       box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
+  #roi .tag{position:absolute;left:0;top:-26px;background:#ffc800;color:#1a1400;font-size:12px;font-weight:800;
+            padding:3px 8px;border-radius:6px;white-space:nowrap;pointer-events:none}
+  #roi .h{position:absolute;width:18px;height:18px;background:#ffc800;border:2px solid #1a1400;border-radius:4px}
+  #roi .h[data-h=nw]{left:-10px;top:-10px;cursor:nwse-resize} #roi .h[data-h=se]{right:-10px;bottom:-10px;cursor:nwse-resize}
+  #roi .h[data-h=ne]{right:-10px;top:-10px;cursor:nesw-resize} #roi .h[data-h=sw]{left:-10px;bottom:-10px;cursor:nesw-resize}
+  .badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:8px;
+         font-weight:800;font-size:14px;color:var(--muted);pointer-events:none}
+  .badge.in{color:var(--good)}
+  .badge[hidden]{display:none}
+  .camstatus{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;
+             background:rgba(13,17,23,.92);color:var(--warn);font-size:20px;font-weight:800;line-height:1.5}
+  .camstatus[hidden]{display:none}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .45s}
+  .flash.on{opacity:.85;transition:none}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{font:inherit;font-weight:700;font-size:16px;border-radius:12px;border:1px solid var(--line);
+         background:var(--panel);color:var(--text);padding:12px 18px;cursor:pointer}
+  button:hover:not(:disabled){border-color:#58606b}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  #snap{background:var(--accent);border-color:var(--accent);color:#fff;font-size:22px;padding:16px 44px;letter-spacing:.04em}
+  .toggle.on{background:#12361f;border-color:var(--good);color:var(--good)}
+  .hint{color:var(--muted);font-size:13px}
+  .hist{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;flex:none}
+  .pagebtn{border-color:#2f81f7;color:#58a6ff}
+  .cancelbtn{border-color:var(--bad);color:var(--bad)}
+  .cancelbtn[hidden]{display:none}
+  .askrow{display:flex;gap:8px;flex:none}
+  .askrow input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border-radius:12px;
+                border:1px solid var(--line);background:var(--deep);color:var(--text)}
+  .askrow input:focus{outline:none;border-color:var(--accent)}
+  .askrow button{padding:8px 14px}
+  .tray{flex:none;border:1px dashed #2f81f7;border-radius:12px;padding:12px;background:#0f1a2a}
+  .tray[hidden]{display:none}
+  .tray-head{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .tray-head .label{margin-right:auto;color:#58a6ff}
+  .answerall{background:var(--good);border-color:var(--good);color:#06210f}
+  .thumbs{display:flex;gap:10px;overflow-x:auto}
+  .thumb{position:relative;flex:none}
+  .thumb img{height:90px;border-radius:8px;border:1px solid var(--line);display:block}
+  .thumb .n{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.75);font-size:12px;font-weight:800;padding:2px 7px;border-radius:6px}
+  .thumb .x{position:absolute;right:4px;top:4px;padding:2px 8px;font-size:13px;border-radius:8px;background:rgba(0,0,0,.75)}
+  .shots{display:flex;flex-direction:column;gap:8px}
+  .controls,.hint{flex:none}
+  .hist button{padding:8px 12px;font-size:13px;white-space:nowrap}
+  .hist button.active{border-color:var(--accent);color:var(--accent)}
+  .right{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;overflow:auto;
+         display:flex;flex-direction:column;gap:16px;min-height:0}
+  .empty{color:var(--muted);font-size:20px;margin:auto;text-align:center;line-height:1.7}
+  .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:#1f2a37;color:var(--muted)}
+  .chip.online{color:var(--online)} .chip.offline{color:var(--good)}
+  .note{color:var(--warn);font-weight:700}
+  .q{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--deep)}
+  .label{color:var(--muted);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+  .stem{color:#c9d1d9;font-size:15px;margin:8px 0 14px;line-height:1.45}
+  .mcq{display:flex;gap:18px;align-items:center}
+  .letter{flex:none;width:96px;height:96px;border-radius:50%;background:var(--good);color:#06210f;
+          font-size:58px;font-weight:900;display:grid;place-items:center}
+  .opt{font-size:28px;font-weight:800;line-height:1.25}
+  .reason{font-size:22px;font-weight:700;line-height:1.5;margin-top:16px}
+  .theory{font-size:26px;font-weight:800;line-height:1.45}
+  .pending{color:var(--warn);font-weight:800;font-size:20px}
+  .err{color:var(--bad);font-size:22px;font-weight:800;line-height:1.4}
+  .shot{max-width:100%;max-height:260px;border-radius:10px;border:1px solid var(--line);cursor:zoom-in;margin-top:8px;display:block}
+  .spin{display:inline-block;width:18px;height:18px;border:3px solid currentColor;border-right-color:transparent;
+        border-radius:50%;animation:spin 1s linear infinite;vertical-align:-3px;margin-right:10px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f6feb;color:#fff;
+         padding:12px 20px;border-radius:10px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none}
+  .toast.show{opacity:1}
+  @media (max-width:1000px){main{grid-template-columns:1fr}.hint{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">SnapAnswer</div>
+  <span id="status" class="pill">Connecting…</span>
+  <div class="seg" title="O to switch">
+    <button id="m-offline" onclick="setMode('offline')">Offline<small id="m-offline-sub">local · free</small></button>
+    <button id="m-online" onclick="setMode('online')">Online<small id="m-online-sub">Claude API</small></button>
+  </div>
+  <span id="cam" class="cam"></span>
+</header>
+
+<main>
+  <section class="left">
+    <div class="view" id="view">
+      <img id="video" src="/video" alt="Live camera" draggable="false">
+      <div id="roi">
+        <div class="tag">Capture area · drag to move, corners to resize</div>
+        <div class="h" data-h="nw"></div><div class="h" data-h="ne"></div>
+        <div class="h" data-h="sw"></div><div class="h" data-h="se"></div>
+      </div>
+      <div id="dist" class="badge">- cm</div>
+      <div id="camstatus" class="camstatus" hidden></div>
+      <div id="flash" class="flash"></div>
+    </div>
+    <div class="controls">
+      <button id="snap" onclick="snap()">SNAP</button>
+      <button id="cancel" class="cancelbtn" onclick="cancelJob()" hidden>Cancel</button>
+      <button id="addpage" class="pagebtn" onclick="addPage()">+ Add page</button>
+      <button onclick="save()">Save</button>
+      <button onclick="repeat()">Repeat</button>
+      <button id="stop" onclick="stopVoice()">Stop voice</button>
+      <button id="auto" class="toggle" onclick="toggleAuto()">Auto: off</button>
+      <button onclick="resetRoi()">Reset area</button>
+    </div>
+    <div class="askrow">
+      <input id="ask" type="text" maxlength="500" autocomplete="off"
+             placeholder="Optional: ask something about the picture, e.g. &quot;explain this diagram&quot;, &quot;summarise this&quot;, &quot;what is this component?&quot;">
+      <button id="askclear" onclick="$('#ask').value=''" title="Clear">×</button>
+    </div>
+    <div id="tray" class="tray" hidden>
+      <div class="tray-head">
+        <span id="tray-title" class="label">Pages</span>
+        <button id="answerall" class="answerall" onclick="answerPages()">Answer all</button>
+        <button onclick="clearPages()">Clear</button>
+      </div>
+      <div id="thumbs" class="thumbs"></div>
+    </div>
+    <div class="hint">Space snap · P add page · Enter answer all pages · S save · R repeat · A auto · O online/offline · Esc stop voice</div>
+    <div id="hist" class="hist"></div>
+  </section>
+
+  <section id="answers" class="right"></section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+let lastVersion = -1, currentId = null, viewingId = null, mode = "offline", onlineOK = false;
+const cache = {};
+let roi = {x:.1, y:.1, w:.8, h:.8}, drag = null;
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function post(url, body){
+  const r = await fetch(url, {method:"POST", headers: body ? {"Content-Type":"application/json"} : {},
+                              body: body ? JSON.stringify(body) : undefined});
+  return r.json();
+}
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"), 2600); }
+const idParam = () => viewingId ? "?id=" + viewingId : "";
+
+async function snap(){
+  const f=$("#flash"); f.classList.add("on"); setTimeout(()=>f.classList.remove("on"), 60);
+  const r = await post("/snap", {ask: $("#ask").value}); if(!r.ok) toast(r.message);
+}
+async function addPage(){
+  const f=$("#flash"); f.classList.add("on"); setTimeout(()=>f.classList.remove("on"), 60);
+  toast((await post("/page/add")).message);
+}
+async function answerPages(){ const r = await post("/page/answer", {ask: $("#ask").value}); toast(r.message); }
+async function cancelJob(){ toast((await post("/cancel")).message); }
+async function clearPages(){ toast((await post("/page/clear")).message); }
+async function removePage(i){ await post("/page/remove?i=" + i); }
+let pageKey = "";
+function renderPages(pages, max){
+  const key = pages.join("|");
+  if(key === pageKey) return;
+  pageKey = key;
+  $("#tray").hidden = !pages.length;
+  $("#tray-title").textContent = `Pages ready: ${pages.length} of ${max} · add more, then Answer all`;
+  $("#answerall").textContent = `Answer all (${pages.length})`;
+  $("#thumbs").innerHTML = pages.map((u, i) =>
+    `<div class="thumb"><img src="${u}" alt="Page ${i+1}" onclick="window.open(this.src)"><span class="n">${i+1}</span>`
+    + `<button class="x" onclick="removePage(${i})" title="Remove page">×</button></div>`).join("");
+}
+async function save(){ toast((await post("/save" + idParam())).message); }
+async function repeat(){ const r = await post("/repeat" + idParam()); if(!r.ok) toast(r.message); }
+async function stopVoice(){ await post("/stop"); }
+async function toggleAuto(){ toast((await post("/auto")).message); }
+async function setMode(m){ const r = await post("/mode?m=" + m); toast(r.message); }
+
+/* ---------- capture area (drag / resize) ---------- */
+function placeRoi(){
+  const b = $("#roi");
+  b.style.left = roi.x*100 + "%"; b.style.top = roi.y*100 + "%";
+  b.style.width = roi.w*100 + "%"; b.style.height = roi.h*100 + "%";
+}
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+$("#roi").addEventListener("pointerdown", e => {
+  const v = $("#view").getBoundingClientRect();
+  drag = {h: e.target.dataset.h || "move", sx: e.clientX, sy: e.clientY, s: {...roi}, W: v.width, H: v.height};
+  $("#roi").setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+$("#roi").addEventListener("pointermove", e => {
+  if(!drag) return;
+  const dx = (e.clientX - drag.sx) / drag.W, dy = (e.clientY - drag.sy) / drag.H, s = drag.s, MIN = .08;
+  let {x, y, w, h} = s;
+  if(drag.h === "move"){ x = clamp(s.x + dx, 0, 1 - s.w); y = clamp(s.y + dy, 0, 1 - s.h); }
+  else {
+    if(drag.h.includes("w")){ x = clamp(s.x + dx, 0, s.x + s.w - MIN); w = s.x + s.w - x; }
+    if(drag.h.includes("e")){ w = clamp(s.w + dx, MIN, 1 - s.x); }
+    if(drag.h.includes("n")){ y = clamp(s.y + dy, 0, s.y + s.h - MIN); h = s.y + s.h - y; }
+    if(drag.h.includes("s")){ h = clamp(s.h + dy, MIN, 1 - s.y); }
+  }
+  roi = {x, y, w, h}; placeRoi();
+});
+async function endDrag(){
+  if(!drag) return;
+  drag = null;
+  const r = await post("/roi", roi); if(!r.ok) toast(r.message);
+}
+$("#roi").addEventListener("pointerup", endDrag);
+$("#roi").addEventListener("pointercancel", endDrag);
+async function resetRoi(){ roi = {x:.1, y:.1, w:.8, h:.8}; placeRoi(); toast((await post("/roi", roi)).message); }
+
+/* keep the view the same shape as the camera picture so the box maps exactly */
+$("#video").addEventListener("load", function(){
+  if(this.naturalWidth) $("#view").style.aspectRatio = this.naturalWidth + " / " + this.naturalHeight;
+});
+$("#video").onerror = function(){ setTimeout(() => { this.src = "/video?" + Date.now(); }, 1000); };
+setInterval(() => { const i = $("#video"); if(i.naturalWidth) $("#view").style.aspectRatio = i.naturalWidth + " / " + i.naturalHeight; }, 2000);
+
+/* ---------- answers ---------- */
+function render(res){
+  const box = $("#answers");
+  if(!res){ box.innerHTML = '<div class="empty">Put a question, or anything you want explained, inside the yellow box<br>and press <b>SNAP</b> (or Space).<br><small>Several pages? Press <b>+ Add page</b> for each, then <b>Answer all</b>.</small></div>'; return; }
+  let h = `<div class="meta"><span class="chip ${res.mode}">${res.mode === "online" ? "Online · Claude" : "Offline · local"}</span>`
+        + (res.done && res.seconds != null ? `<span class="chip">${res.seconds}s</span>` : "")
+        + (res.pages > 1 ? `<span class="chip">${res.pages} pages</span>` : "")
+        + `<span class="chip">${esc(res.time)}</span></div>`;
+  if(res.ask) h += `<div class="stem">You asked: <b>${esc(res.ask)}</b></div>`;
+  if(res.note) h += `<div class="note">${esc(res.note)}</div>`;
+  if(res.error) h += `<div class="err">${esc(res.error)}</div>`;
+  if(!res.questions.length && !res.done && !res.error)
+    h += `<div class="pending"><span class="spin"></span>${res.mode === "online" ? "Asking Claude…" : "Reading the picture…"}</div>`;
+  for(const q of res.questions){
+    const kindLabel = q.kind === "mcq" ? "Multiple choice" : q.kind === "info" ? (res.ask ? "Your request" : "Explanation") : "Theory";
+    h += `<div class="q"><div class="label">${kindLabel}${q.number ? (q.kind === "info" ? " · page " : " · Q") + esc(q.number) : ""}</div>
+          <div class="stem">${esc(q.stem)}</div>`;
+    if(q.pending) h += `<div class="pending"><span class="spin"></span>Solving…</div>`;
+    else if(q.failed) h += `<div class="err" style="font-size:18px">Couldn't answer this one. Press SNAP to try again.</div>`;
+    else if(q.kind==="mcq")
+      h += `<div class="mcq"><div class="letter">${esc(q.letter)}</div><div class="opt">${esc(q.option_text)}</div></div>
+            <div class="reason">${esc(q.reason)}</div>`;
+    else h += `<div class="theory">${esc(q.answer)}</div>`;
+    h += "</div>";
+  }
+  const imgs = res.images || [res.image];
+  h += `<div><div class="label">What the AI saw${imgs.length > 1 ? " · " + imgs.length + " pages" : ""}</div><div class="shots">`
+     + imgs.map((u, i) => `<img class="shot" src="${u}" onclick="window.open(this.src)" alt="Page ${i+1}">`).join("")
+     + `</div></div>`;
+  box.innerHTML = h;
+}
+
+function renderHistory(list){
+  $("#hist").innerHTML = list.map(x =>
+    `<button data-id="${x.id}" class="${x.id===viewingId ? "active" : ""}" onclick="view('${x.id}')">${esc(x.time)} · ${esc(x.summary)}</button>`).join("");
+}
+
+async function view(id){
+  viewingId = id;
+  let r = cache[id];
+  if(!r || !r.done){ r = await (await fetch("/result/" + id)).json(); cache[id] = r; }
+  render(r);
+  document.querySelectorAll("#hist button").forEach(b => b.classList.toggle("active", b.dataset.id === id));
+}
+
+async function poll(){
+  try{
+    const s = await (await fetch("/state")).json();
+    const pill = $("#status");
+    pill.textContent = s.status;
+    pill.className = "pill " + (s.busy ? "busy" : s.speaking ? "speak" : "ready");
+    $("#cam").textContent = s.camera;
+
+    mode = s.mode; onlineOK = s.online_available;
+    $("#m-offline").className = mode === "offline" ? "on off-mode" : "";
+    $("#m-online").className = mode === "online" ? "on on-mode" : "";
+    $("#m-offline-sub").textContent = s.offline_model;
+    $("#m-online-sub").textContent = onlineOK ? s.online_model : "no API key";
+    $("#m-online").disabled = !onlineOK;
+
+    const cs = $("#camstatus");
+    cs.hidden = !s.cam_status; cs.textContent = s.cam_status || "";
+    const d = $("#dist");
+    if(s.dist){ d.textContent = Math.round(s.dist*100) + " cm"; d.className = "badge" + (s.dist>=s.near && s.dist<=s.far ? " in" : ""); }
+    else { d.textContent = s.has_depth ? "- cm" : ""; d.className = "badge"; }
+    d.hidden = !s.has_depth;
+
+    const a = $("#auto");
+    a.textContent = "Auto: " + (s.auto ? "ON" : "off"); a.classList.toggle("on", s.auto); a.disabled = !s.auto_available;
+    $("#snap").disabled = s.busy;
+    $("#stop").disabled = !s.speaking;
+
+    if(!drag && s.roi){ roi = s.roi; placeRoi(); }
+
+    renderPages(s.pages || [], s.max_pages || 10);
+    $("#answerall").disabled = s.busy;
+    $("#cancel").hidden = !s.busy;
+    $("#addpage").textContent = (s.pages && s.pages.length) ? `+ Add page (${s.pages.length})` : "+ Add page";
+    if(s.version !== lastVersion){
+      lastVersion = s.version;
+      const cid = s.current ? s.current.id : null;
+      if(cid !== currentId){ currentId = cid; viewingId = cid; }
+      if(s.current) cache[s.current.id] = s.current;
+      renderHistory(s.history);
+      if(viewingId === currentId) render(s.current);
+    }
+  }catch(e){
+    $("#status").textContent = "Disconnected"; $("#status").className = "pill";
+  }
+  setTimeout(poll, 400);
+}
+
+document.addEventListener("keydown", e => {
+  if(e.repeat) return;
+  if(e.target.tagName === "INPUT"){
+    if(e.key === "Enter"){ e.preventDefault(); e.target.blur(); if(!$("#tray").hidden) answerPages(); else snap(); }
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if(k === " "){ e.preventDefault(); snap(); }
+  else if(k === "s") save();
+  else if(k === "r") repeat();
+  else if(k === "a") toggleAuto();
+  else if(k === "o") setMode(mode === "online" ? "offline" : "online");
+  else if(k === "p") addPage();
+  else if(k === "enter"){ if(!$("#tray").hidden) answerPages(); }
+  else if(k === "escape") stopVoice();
+});
+
+placeRoi();
+render(null);
+poll();
+</script>
+</body>
+</html>

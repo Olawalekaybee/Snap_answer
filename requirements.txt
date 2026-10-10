@@ -1,0 +1,8 @@
+numpy
+opencv-python
+requests
+kokoro>=0.9.4
+soundfile
+sounddevice
+flask
+anthropic
