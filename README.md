@@ -1,12 +1,14 @@
----
-noteId: "7ae24590c4b511f18e27434f65ac3337"
-tags: []
+<p align="center">
+  <img src="docs/aowlyf-logo.png" alt="AOWLYF Dynamics" width="220">
+</p>
 
----
+<h1 align="center">SnapAnswer</h1>
 
-# SnapAnswer
-
-Point a camera at a question, press one button, and get a clear answer on screen and read out loud.
+<p align="center">
+  Point a camera at a question, press one button, and get a clear answer on screen and read out loud.
+  <br>
+  <sub>A project by <b>AOWLYF Dynamics Ltd</b></sub>
+</p>
 
 SnapAnswer is a small AI system that runs on an NVIDIA DGX Spark with a USB webcam. It reads what is in front of the camera, works out the answer, shows it in large text on a browser dashboard and speaks it through a speaker. It handles multiple-choice questions, written (theory) questions, several pages at once, and things that are not questions at all, such as a diagram you want explained.
 
@@ -67,13 +69,13 @@ SnapAnswer is a small AI system that runs on an NVIDIA DGX Spark with a USB webc
 
 ### Hardware
 
-| Part                | What we used                         | Notes                                                                           |
-| ------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
-| Computer            | NVIDIA DGX Spark (ARM64, DGX OS)     | Any Ubuntu 22.04/24.04 machine works. A GPU makes offline mode much faster.     |
-| Camera              | EMEET SmartCam C60E 4K (model E3124) | Any UVC webcam works. 4K with autofocus gives the sharpest text.                |
-| Camera (optional)   | Intel RealSense D435i                | Also supported, and adds depth-based auto-capture. Needs an extra driver build. |
-| Speaker             | Any USB or HDMI speaker              | Plugged into the Spark, not into the laptop you browse from.                    |
-| Mount (recommended) | Small tripod or arm                  | Point the camera straight down at the desk from 30 to 40 cm.                    |
+| Part | What we used | Notes |
+|---|---|---|
+| Computer | NVIDIA DGX Spark (ARM64, DGX OS) | Any Ubuntu 22.04/24.04 machine works. A GPU makes offline mode much faster. |
+| Camera | EMEET SmartCam C60E 4K (model E3124) | Any UVC webcam works. 4K with autofocus gives the sharpest text. |
+| Camera (optional) | Intel RealSense D435i | Also supported, and adds depth-based auto-capture. Needs an extra driver build. |
+| Speaker | Any USB or HDMI speaker | Plugged into the Spark, not into the laptop you browse from. |
+| Mount (recommended) | Small tripod or arm | Point the camera straight down at the desk from 30 to 40 cm. |
 
 ### Accounts (optional)
 
@@ -90,7 +92,7 @@ These steps take you from a fresh machine to a working SnapAnswer app. Most of t
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/olawalekaybee/Snap_answer.git
+git clone https://github.com/Olawalekaybee/Snap_answer.git
 cd Snap_answer
 ```
 
@@ -141,33 +143,33 @@ From now on you never need a terminal to use it. Just click the icon.
 
 ## Using the dashboard
 
-| Control                    | What it does                                                                                                                            |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Yellow box**       | The capture area. Drag it to move it, drag the corners to resize. Only what is inside is sent to the AI. It is remembered between runs. |
-| **SNAP**             | Captures the box and answers straight away.                                                                                             |
-| **+ Add page**       | Adds the current page to a batch. Do this for each page.                                                                                |
-| **Answer all**       | Appears once you have added pages. Answers the whole batch together.                                                                    |
-| **Ask box**          | Optional. Type what you want, for example "explain this diagram". Applies to SNAP and Answer all.                                       |
-| **Online / Offline** | Chooses where the AI runs (see below).                                                                                                  |
-| **Save**             | Copies the photos and a text file with the questions and answers into`saved/`.                                                        |
-| **Repeat**           | Reads the last answer again.                                                                                                            |
-| **Stop voice**       | Stops speaking.                                                                                                                         |
-| **Cancel**           | Appears while it is working. Abandons the current request.                                                                              |
-| **Auto**             | Snaps by itself when a page is held still. Take the page away and bring the next one.                                                   |
-| **History**          | The row of buttons under the controls. Click one to see an earlier answer.                                                              |
+| Control | What it does |
+|---|---|
+| **Yellow box** | The capture area. Drag it to move it, drag the corners to resize. Only what is inside is sent to the AI. It is remembered between runs. |
+| **SNAP** | Captures the box and answers straight away. |
+| **+ Add page** | Adds the current page to a batch. Do this for each page. |
+| **Answer all** | Appears once you have added pages. Answers the whole batch together. |
+| **Ask box** | Optional. Type what you want, for example "explain this diagram". Applies to SNAP and Answer all. |
+| **Online / Offline** | Chooses where the AI runs (see below). |
+| **Save** | Copies the photos and a text file with the questions and answers into `saved/`. |
+| **Repeat** | Reads the last answer again. |
+| **Stop voice** | Stops speaking. |
+| **Cancel** | Appears while it is working. Abandons the current request. |
+| **Auto** | Snaps by itself when a page is held still. Take the page away and bring the next one. |
+| **History** | The row of buttons under the controls. Click one to see an earlier answer. |
 
 ### Keyboard shortcuts
 
-| Key       | Action                |
-| --------- | --------------------- |
-| `Space` | Snap                  |
-| `P`     | Add page              |
-| `Enter` | Answer all pages      |
-| `S`     | Save                  |
-| `R`     | Repeat                |
-| `A`     | Auto-capture on/off   |
-| `O`     | Switch online/offline |
-| `Esc`   | Stop voice            |
+| Key | Action |
+|---|---|
+| `Space` | Snap |
+| `P` | Add page |
+| `Enter` | Answer all pages |
+| `S` | Save |
+| `R` | Repeat |
+| `A` | Auto-capture on/off |
+| `O` | Switch online/offline |
+| `Esc` | Stop voice |
 
 ### Tips for good results
 
@@ -178,14 +180,14 @@ From now on you never need a terminal to use it. Just click the icon.
 
 ## Online and offline modes
 
-|          | Online                                                              | Offline                                       |
-| -------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| Runs on  | Claude API (`claude-sonnet-5-5` by default)                       | Your machine (`qwen3-vl:8b` through Ollama) |
-| Speed    | A few seconds for a whole page                                      | Slower, depends on your GPU                   |
-| Accuracy | Highest, especially for maths, engineering and multi-page questions | Good for general questions                    |
-| Internet | Required                                                            | Not needed                                    |
-| Cost     | Pay per use (small per snap)                                        | Free                                          |
-| Privacy  | Photos are sent to the Claude API                                   | Nothing leaves the machine                    |
+| | Online | Offline |
+|---|---|---|
+| Runs on | Claude API (`claude-sonnet-5-5` by default) | Your machine (`qwen3-vl:8b` through Ollama) |
+| Speed | A few seconds for a whole page | Slower, depends on your GPU |
+| Accuracy | Highest, especially for maths, engineering and multi-page questions | Good for general questions |
+| Internet | Required | Not needed |
+| Cost | Pay per use (small per snap) | Free |
+| Privacy | Photos are sent to the Claude API | Nothing leaves the machine |
 
 If an online request fails (no internet, for example), SnapAnswer answers offline instead and shows a yellow note explaining why.
 
@@ -193,24 +195,24 @@ If an online request fails (no internet, for example), SnapAnswer answers offlin
 
 Settings you change on the dashboard (capture box, online/offline) are saved in `settings.json` automatically. Everything else is a command-line option of `dashboard.py`.
 
-| Option                             | Default               | What it does                                                                     |
-| ---------------------------------- | --------------------- | -------------------------------------------------------------------------------- |
-| `--port`                         | `8000`              | Web port for the dashboard                                                       |
-| `--mode`                         | `offline`           | Starting mode the first time (after that, your last choice is remembered)        |
-| `--online-model`                 | `claude-sonnet-5-5` | Claude model for online mode.`claude-haiku-5-5` is faster and cheaper.         |
-| `--vision-model`                 | `qwen3-vl:8b`       | Offline model that reads the page                                                |
-| `--reasoner`                     | same as vision model  | Offline model that answers, for example`gpt-oss:20b`                           |
-| `--think`                        | none                  | Reasoning effort for thinking models, for example`medium` for gpt-oss          |
-| `--voice`                        | `bm_george`         | Kokoro voice:`bm_george`, `bf_emma`, `am_michael`, `af_heart` and others |
-| `--speed`                        | `1.0`               | Speaking speed                                                                   |
-| `--tts`                          | `kokoro`            | `kokoro`, `piper` or `none`                                                |
-| `--camera`                       | `auto`              | `auto` (EMEET or other webcam first, then RealSense), `uvc` or `realsense` |
-| `--uvc`                          | none                  | Force a specific webcam, for example`0` for `/dev/video0`                    |
-| `--uvc-width` / `--uvc-height` | `3840` / `2160`   | Webcam resolution to request                                                     |
-| `--auto`                         | off                   | Start with auto-capture on                                                       |
-| `--hold`                         | `1.2`               | Seconds a page must be still before auto-capture fires                           |
-| `--max-pages`                    | `10`                | Maximum pages in one batch                                                       |
-| `--max-questions`                | `8`                 | Maximum questions answered per page                                              |
+| Option | Default | What it does |
+|---|---|---|
+| `--port` | `8000` | Web port for the dashboard |
+| `--mode` | `offline` | Starting mode the first time (after that, your last choice is remembered) |
+| `--online-model` | `claude-sonnet-5-5` | Claude model for online mode. `claude-haiku-5-5` is faster and cheaper. |
+| `--vision-model` | `qwen3-vl:8b` | Offline model that reads the page |
+| `--reasoner` | same as vision model | Offline model that answers, for example `gpt-oss:20b` |
+| `--think` | none | Reasoning effort for thinking models, for example `medium` for gpt-oss |
+| `--voice` | `bm_george` | Kokoro voice: `bm_george`, `bf_emma`, `am_michael`, `af_heart` and others |
+| `--speed` | `1.0` | Speaking speed |
+| `--tts` | `kokoro` | `kokoro`, `piper` or `none` |
+| `--camera` | `auto` | `auto` (EMEET or other webcam first, then RealSense), `uvc` or `realsense` |
+| `--uvc` | none | Force a specific webcam, for example `0` for `/dev/video0` |
+| `--uvc-width` / `--uvc-height` | `3840` / `2160` | Webcam resolution to request |
+| `--auto` | off | Start with auto-capture on |
+| `--hold` | `1.2` | Seconds a page must be still before auto-capture fires |
+| `--max-pages` | `10` | Maximum pages in one batch |
+| `--max-questions` | `8` | Maximum questions answered per page |
 
 To change an option for the installed app, edit the `ExecStart=` line in `~/.config/systemd/user/snapanswer.service`, then run:
 
@@ -257,7 +259,6 @@ settings.json    Your capture box and mode
 
 **The SnapAnswer window says "refused to connect"**
 The background service is not running. Check it and read the log:
-
 ```bash
 systemctl --user status snapanswer
 journalctl --user -u snapanswer -n 40 --no-pager
@@ -274,11 +275,9 @@ Try another USB port. For the RealSense, use a blue USB 3 port and a USB 3 data 
 
 **Online mode says "Online failed"**
 The yellow note shows the reason. Test your key with:
-
 ```bash
 python -c "import anthropic; k=open('.anthropic_key').read().strip(); print(anthropic.Anthropic(api_key=k).messages.create(model='claude-sonnet-5-5',max_tokens=20,messages=[{'role':'user','content':'Say OK'}]).content[0].text)"
 ```
-
 `OK` means the key works. An authentication error means the key file is wrong. A billing error means you need to add credit in the Console.
 
 **Offline mode is slow or says it cannot read the page**
@@ -288,11 +287,9 @@ The first offline answer after a restart is slow while the model loads. Make sur
 The voice plays on the machine running SnapAnswer, not on the device you browse from. Check the speaker with `pactl list short sinks` and make sure the right output is selected.
 
 **After updating the code**
-
 ```bash
 systemctl --user restart snapanswer
 ```
-
 Then reopen the SnapAnswer window. To remove the app setup (your files stay), run `bash install_app.sh --uninstall`.
 
 ## Privacy and cost
@@ -320,4 +317,4 @@ SnapAnswer is deliberately small: about four files, no frameworks beyond Flask, 
 - [OpenCV](https://opencv.org) and [Flask](https://flask.palletsprojects.com)
 - [Intel RealSense SDK](https://github.com/IntelRealSense/librealsense) for optional RealSense support
 
-Built by Olawale Kabiru Balogun.
+Built by Olawale Kabiru Balogun at **AOWLYF Dynamics Ltd**, Abuja, Nigeria.
